@@ -7,7 +7,7 @@ import io.quarkus.runtime.annotations.ConfigRoot;
 @ConfigRoot(phase = ConfigPhase.RUN_TIME)
 public class RedisConfiguration {
     /**
-     * COnnection uri
+     * Connection uri
      */
     @ConfigItem(defaultValue = "redis://localhost:6379")
     public String uri;

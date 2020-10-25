@@ -21,22 +21,18 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.sourcesense.quarkus</groupId>
     <artifactId>quarkus-redis-parent</artifactId>
-    <version>1.0.1</version>
+    <version>1.9.0.Final</version>
     <name>Quarkus - Redis</name>
     <packaging>pom</packaging>
-    <distributionManagement>
+    <!--distributionManagement>
         <repository>
             <id>nexus-sole</id>
             <url>http://10.98.221.201:8083/repository/maven-releases/</url>
         </repository>
-        <!--<repository>-->
-            <!--<id>nexus-public</id>-->
-            <!--<url>https://nexus.sourcesense.com/repository/sourcesense-mvn-pub</url>-->
-        <!--</repository>-->
-    </distributionManagement>
+    </distributionManagement-->
 
     <properties>
-        <quarkus.version>0.15.0</quarkus.version>
+        <quarkus.version>1.9.0.Final</quarkus.version>
         <maven.compiler>3.8.0</maven.compiler>
     </properties>
     <dependencyManagement>

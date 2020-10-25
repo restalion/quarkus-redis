@@ -6,12 +6,12 @@
 
     <groupId>com.sourcesense.quarkus</groupId>
     <artifactId>quarkus-redis-deployment</artifactId>
-    <version>1.0.1</version>
+    <version>1.9.0.Final</version>
     <name>Quarkus - Redis - Deployment</name>
     <parent>
         <artifactId>quarkus-redis-parent</artifactId>
         <groupId>com.sourcesense.quarkus</groupId>
-        <version>1.0.1</version>
+        <version>1.9.0.Final</version>
         <relativePath>../</relativePath>
     </parent>
     <dependencies>
@@ -28,7 +28,7 @@
         <dependency>
             <groupId>com.sourcesense.quarkus</groupId>
             <artifactId>quarkus-redis</artifactId>
-            <version>1.0.1</version>
+            <version>1.9.0.Final</version>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
@@ -48,7 +48,7 @@
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-junit4</artifactId>
+            <artifactId>quarkus-junit5</artifactId>
             <version>${quarkus.version}</version>
             <scope>test</scope>
         </dependency>

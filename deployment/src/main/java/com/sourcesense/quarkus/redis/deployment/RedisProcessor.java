@@ -1,5 +1,27 @@
 package com.sourcesense.quarkus.redis.deployment;
 
+import javax.management.MBeanServer;
+import javax.management.MBeanServerConnection;
+
+import com.sourcesense.quarkus.redis.runtime.RedisClientProducer;
+import com.sourcesense.quarkus.redis.runtime.RedisClientTemplate;
+import com.sourcesense.quarkus.redis.runtime.RedisConfiguration;
+
+import org.apache.commons.pool2.KeyedObjectPool;
+import org.apache.commons.pool2.KeyedPooledObjectFactory;
+import org.apache.commons.pool2.ObjectPool;
+import org.apache.commons.pool2.PooledObject;
+import org.apache.commons.pool2.PooledObjectFactory;
+import org.apache.commons.pool2.SwallowedExceptionListener;
+import org.apache.commons.pool2.TrackedUse;
+import org.apache.commons.pool2.UsageTracking;
+import org.apache.commons.pool2.impl.BaseGenericObjectPool;
+import org.apache.commons.pool2.impl.DefaultEvictionPolicy;
+import org.apache.commons.pool2.impl.EvictionPolicy;
+import org.eclipse.microprofile.config.ConfigProvider;
+import org.jboss.jandex.ClassInfo;
+import org.jboss.jandex.DotName;
+
 import io.quarkus.arc.deployment.AdditionalBeanBuildItem;
 import io.quarkus.arc.deployment.BeanContainerBuildItem;
 import io.quarkus.deployment.annotations.BuildProducer;
@@ -10,23 +32,14 @@ import io.quarkus.deployment.builditem.CombinedIndexBuildItem;
 import io.quarkus.deployment.builditem.FeatureBuildItem;
 import io.quarkus.deployment.builditem.ServiceStartBuildItem;
 import io.quarkus.deployment.builditem.ShutdownContextBuildItem;
-import io.quarkus.deployment.builditem.substrate.ReflectiveClassBuildItem;
-import io.quarkus.deployment.builditem.substrate.SubstrateProxyDefinitionBuildItem;
-import com.sourcesense.quarkus.redis.runtime.RedisClientProducer;
-import com.sourcesense.quarkus.redis.runtime.RedisClientTemplate;
-import com.sourcesense.quarkus.redis.runtime.RedisConfiguration;
+import io.quarkus.deployment.builditem.nativeimage.NativeImageProxyDefinitionBuildItem;
+import io.quarkus.deployment.builditem.nativeimage.ReflectiveClassBuildItem;
 import io.quarkus.runtime.RuntimeValue;
-import org.apache.commons.pool2.*;
-import org.apache.commons.pool2.impl.BaseGenericObjectPool;
-import org.apache.commons.pool2.impl.DefaultEvictionPolicy;
-import org.apache.commons.pool2.impl.EvictionPolicy;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.ShardedJedisPool;
 
-import javax.management.MBeanServer;
-import javax.management.MBeanServerConnection;
-
 public final class RedisProcessor {
+
     private static final String[] INTERFACES_TO_REGISTER = {
             EvictionPolicy.class.getName(),
     };
@@ -47,8 +60,8 @@ public final class RedisProcessor {
     }
 
     @BuildStep
-    SubstrateProxyDefinitionBuildItem httpProxies() {
-        return new SubstrateProxyDefinitionBuildItem(MBeanServer.class.getName(),
+    NativeImageProxyDefinitionBuildItem httpProxies() {
+        return new NativeImageProxyDefinitionBuildItem(MBeanServer.class.getName(),
                 MBeanServerConnection.class.getName(),
                 KeyedObjectPool.class.getName(),
                 KeyedPooledObjectFactory.class.getName(),
@@ -63,29 +76,33 @@ public final class RedisProcessor {
     @BuildStep
     @Record(ExecutionTime.RUNTIME_INIT)
     RedisBuildItem build(RedisClientTemplate template, BeanContainerBuildItem beanContainer,
-            ShutdownContextBuildItem shutdown, RedisConfiguration config, BuildProducer<ServiceStartBuildItem> serviceStart,
+            ShutdownContextBuildItem shutdown, BuildProducer<ServiceStartBuildItem> serviceStart,
             CombinedIndexBuildItem indexBuildItem,
             BuildProducer<ReflectiveClassBuildItem> reflectiveClassBuildItemBuildProducer) {
-
-        //        for (String className : INTERFACES_TO_REGISTER) {
-        //            System.out.println("============= " + className);
-        //            for (ClassInfo i : indexBuildItem.getIndex().getAllKnownImplementors(DotName.createSimple(className))) {
-        //                String name = i.name().toString();
-        //                System.out.println("===================== " + name);
-        //                reflectiveClassBuildItemBuildProducer.produce(new ReflectiveClassBuildItem(false, false, name));
-        //            }
-        //        }
+/*
+                for (String className : INTERFACES_TO_REGISTER) {
+                    System.out.println("============= " + className);
+                    for (ClassInfo i : indexBuildItem.getIndex().getAllKnownImplementors(DotName.createSimple(className))) {
+                        String name = i.name().toString();
+                        System.out.println("===================== " + name);
+                        reflectiveClassBuildItemBuildProducer.produce(new ReflectiveClassBuildItem(false, false, name));
+                    }
+                }
+*/
         reflectiveClassBuildItemBuildProducer
                 .produce(new ReflectiveClassBuildItem(false, false, BaseGenericObjectPool.class.getName()));
         reflectiveClassBuildItemBuildProducer
                 .produce(new ReflectiveClassBuildItem(false, false, DefaultEvictionPolicy.class.getName()));
         RuntimeValue<ShardedJedisPool> shardedPool = null;
         RuntimeValue<JedisPool> pool = null;
-        if (config.sharded.equals("true")) {
-            shardedPool = template.configureShardedJedisPool(beanContainer.getValue(), config,
-                    shutdown);
+
+        String uri = ConfigProvider.getConfig().getOptionalValue("quarkus.redis.uri", String.class).orElse("redis://localhost:6379/2");
+        String sharded = ConfigProvider.getConfig().getOptionalValue("quarkus.redis.sharded", String.class).orElse("false");
+
+        if (sharded != null && sharded.equals("true")) {
+            shardedPool = template.configureShardedJedisPool(beanContainer.getValue(), shutdown);
         } else {
-            pool = template.configureJedisPool(beanContainer.getValue(), config, shutdown);
+            pool = template.configureJedisPool(beanContainer.getValue(), shutdown);
         }
 
         serviceStart.produce(new ServiceStartBuildItem("jedisPool"));
