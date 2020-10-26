@@ -21,7 +21,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.sourcesense.quarkus</groupId>
     <artifactId>quarkus-redis-parent</artifactId>
-    <version>1.9.0.Final</version>
+    <version>0.0.1-SNAPSHOT</version>
     <name>Quarkus - Redis</name>
     <packaging>pom</packaging>
     <!--distributionManagement>

@@ -35,14 +35,6 @@ public class JedisProducerTest {
                     .addAsResource("application.properties")
                     .addClasses(BeanUsingJedisFromPool.class));
 
-    @Inject
-    BeanUsingJedisFromPool beanUsingJedisFromPool;
-
-    @Test
-    public void testFromPool() throws Exception {
-        beanUsingJedisFromPool.verify();
-    }
-
     @ApplicationScoped
     static class BeanUsingJedisFromPool {
         @Inject

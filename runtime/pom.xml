@@ -6,11 +6,11 @@
     <groupId>com.sourcesense.quarkus</groupId>
     <artifactId>quarkus-redis</artifactId>
     <name>Quarkus - Redis - Runtime</name>
-    <version>1.9.0.Final</version>
+    <version>0.0.1-SNAPSHOT</version>
     <parent>
         <artifactId>quarkus-redis-parent</artifactId>
         <groupId>com.sourcesense.quarkus</groupId>
-        <version>1.9.0.Final</version>
+        <version>0.0.1-SNAPSHOT</version>
         <relativePath>../</relativePath>
     </parent>
     <dependencies>
